@@ -1,0 +1,27 @@
+🧰 Prerequisites
+Ensure you have:
+
+Java 11+ installed: java -version
+
+WSL2 Ubuntu up and running
+
+Network connectivity between WSL2 and Windows (test using ping)
+
+📦 Install Kafka and Zookeeper
+# Update and install Java
+sudo apt update
+sudo apt install default-jdk -y
+
+# Download Kafka (latest 3.x is fine)
+wget https://downloads.apache.org/kafka/3.7.0/kafka_2.13-3.7.0.tgz
+tar -xvzf kafka_2.13-3.7.0.tgz
+mv kafka_2.13-3.7.0 kafka
+cd kafka
+
+⚙️ Configure server.properties
+Edit config/server.properties:
+
+# Replace with your actual WSL IP from: ip addr | grep eth0
+listeners=PLAINTEXT://0.0.0.0:9092
+advertised.listeners=PLAINTEXT://<WSL_IP>:9092
+zookeeper.connect=localhost:2181

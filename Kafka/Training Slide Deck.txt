@@ -1,0 +1,132 @@
+Spring Boot Kafka Microservices - Training Slide Deck
+
+Slide 1: Title
+
+Building Kafka-Based Microservices with Spring Boot
+
+Producer, Broker, Consumer, and Persistence
+
+Real-world architecture using WSL2 & Windows 11
+
+Slide 2: Agenda
+
+Kafka Basics Recap
+
+Project Structure Overview
+
+End-to-End Message Flow
+
+Code Integration Highlights
+
+H2 DB & Console Access
+
+Troubleshooting Tips
+
+Q&A / Demo
+
+Slide 3: Kafka Basics Recap
+
+Broker: Manages topics and message distribution
+
+Producer: Sends messages to Kafka topics
+
+Consumer: Listens to topics and processes messages
+
+Topic: Named stream of records, supports partitions
+
+Slide 4: Project Overview
+
+3-Microservice Architecture:
+
+Notification Service: REST + Kafka Producer
+
+Kafka Broker: Running on WSL2
+
+Consumer Service: Kafka Listener + DB persistence
+
+Slide 5: Message Flow Diagram
+
+[ Client ]
+    |
+    v
+[ Notification Service (8081) ]  --KafkaTemplate-->  [ Kafka Broker (WSL2) ]
+                                                           |
+                                                           v
+                                    [ Consumer Service (8082) ]
+                                           |
+                                           v
+                                     [ H2 Database ]
+
+Slide 6: Notification Producer
+
+Exposes REST API on /api/notifications
+
+Uses KafkaTemplate<String, String> to publish
+
+Auto-creates topic notifications if not present
+
+Slide 7: Kafka Consumer with DB
+
+Annotated with @KafkaListener
+
+Listens to topic notifications
+
+Persists messages with JPA to H2 DB
+
+DB schema auto-created by Hibernate
+
+Slide 8: H2 Console Setup
+
+Enabled via application.yml
+
+spring.h2.console.enabled: true
+spring.h2.console.path: /h2-console
+
+Access via: http://localhost:8082/h2-console
+
+JDBC URL: jdbc:h2:mem:testdb
+
+Slide 9: Troubleshooting
+
+Problem
+
+Solution
+
+Connection refused
+
+Use correct IP from WSL2 (ip route)
+
+No H2 Console
+
+Missing web dependency or wrong port
+
+No Kafka topic
+
+Manually create or check auto.create.topics.enable
+
+Slide 10: Wrap-up & Demo
+
+All services communicating across OS layers
+
+Kafka bridging Windows ↔ WSL2
+
+Full message lifecycle: REST → Kafka → DB
+
+Slide 11: Optional Enhancements
+
+JSON Payloads (with DTO deserialization)
+
+Database indexing, pagination
+
+Expose saved messages via REST
+
+Kafka DLQ or retries
+
+Slide 12: Q&A
+
+Questions
+
+Live demo walkthrough
+
+Discussion on real-world deployment (e.g., Docker/EKS)
+
