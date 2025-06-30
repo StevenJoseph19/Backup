@@ -1,4 +1,4 @@
-🧰 Prerequisites
+Prerequisites
 Ensure you have:
 
 Java 11+ installed: java -version
@@ -7,7 +7,8 @@ WSL2 Ubuntu up and running
 
 Network connectivity between WSL2 and Windows (test using ping)
 
-📦 Install Kafka and Zookeeper
+Install Kafka and Zookeeper
+==============================
 # Update and install Java
 sudo apt update
 sudo apt install default-jdk -y
@@ -18,16 +19,16 @@ tar -xvzf kafka_2.13-3.7.0.tgz
 mv kafka_2.13-3.7.0 kafka
 cd kafka
 
-⚙️ Configure server.properties
+Configure server.properties
+==================================
 Edit config/server.properties:
 
 # Replace with your actual WSL IP from: ip addr | grep eth0
 listeners=PLAINTEXT://0.0.0.0:9092
-
-
+advertised.listeners=PLAINTEXT://<WSL_IP>:9092
 zookeeper.connect=localhost:2181
 
-🚀 Start Zookeeper and Kafka
+Start Zookeeper and Kafka
 # Terminal 1
 bin/zookeeper-server-start.sh config/zookeeper.properties
 
@@ -38,9 +39,9 @@ bin/kafka-server-start.sh config/server.properties
 Verify with:
 # List topics (should return empty at first)
 bin/kafka-topics.sh --list --bootstrap-server <WSL_IP>:9092
-bin/kafka-topics.sh --list --bootstrap-server  172.24.113.151:9092
+# bin/kafka-topics.sh --list --bootstrap-server  172.24.113.151:9092
 
-✅ Test Kafka Access from Windows
+Test Kafka Access from Windows
 On your Windows machine (with kafka-console-producer.sh available or using Spring Boot):
 
 Manually Create the Topic
@@ -55,16 +56,16 @@ bin/kafka-topics.sh \
 
 # From Windows terminal (optional)
 bin/kafka-console-producer.sh --broker-list <WSL_IP>:9092 --topic test
-bin/kafka-console-producer.sh --broker-list  172.24.113.151:9092 --topic test
+# bin/kafka-console-producer.sh --broker-list  172.24.113.151:9092 --topic test
 
 
-✅ Step 2: Notification Microservice (Kafka Producer Gateway)
-🧱 Purpose:
+Step 2: Notification Microservice (Kafka Producer Gateway)
+Purpose:
 Acts as a gateway — receives HTTP requests and forwards messages to Kafka.
 
 Connects to Kafka running at 172.24.113.151:9092 (your WSL2 broker).
 
-📁 Project Structure
+Project Structure
 notification-service/
 ├── src/
 │   └── main/
@@ -75,7 +76,7 @@ notification-service/
 │           └── application.yml
 ├── build.gradle / pom.xml
 └── ...
-⚙️ Dependencies (Maven)
+Dependencies (Maven)
 
 <dependencies>
     <dependency>
@@ -87,7 +88,8 @@ notification-service/
         <artifactId>spring-kafka</artifactId>
     </dependency>
 </dependencies>
-📄 application.yml
+
+application.yml
 server:
   port: 8081
 
@@ -97,7 +99,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-🧠 KafkaProducerService.java
+
+KafkaProducerService.java
 
 @Service
 public class KafkaProducerService {
@@ -113,7 +116,7 @@ public class KafkaProducerService {
         kafkaTemplate.send(topic, message);
     }
 }
-🌐 NotificationController.java
+NotificationController.java
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -131,7 +134,7 @@ public class NotificationController {
         return ResponseEntity.ok("Message sent to Kafka");
     }
 }
-🏃 Run It:
+Run It:
 Start the app, then POST to it:
 Use the Right IP from WSL to Access Windows Host
 In WSL, localhost refers to the WSL Linux VM — not your Windows host.
@@ -154,14 +157,14 @@ Hello from Notification Service
 That confirms it! Your message flowed like this:
 Windows Spring Boot (Notification Service) 
       ⮕ Kafka on WSL2 
-          ⮕ WSL2 Console Consumer printed the message ✔️
+          ⮕ WSL2 Console Consumer printed the message 
 Everything is working perfectly:
 
-Producer ✅
+Producer 
 
-Kafka broker ✅
+Kafka broker 
 
-Manual consumer ✅
+Manual consumer
 
 Use Kafka Console Consumer (WSL2)
 You can use the built-in Kafka console consumer to check that the message landed in the topic:
@@ -192,19 +195,20 @@ Look for this line (you can use Ctrl + W in nano to search):
 
 
 auto.create.topics.enable
-✅ If It’s Present:
+If It’s Present:
 
 auto.create.topics.enable=true
 You're good! Kafka will auto-create topics when your app or CLI writes to one that doesn’t exist.
 
-❌ If It’s Missing:
+If It’s Missing:
 Kafka defaults to true — so auto-creation is still enabled by default, but you can make it explicit by adding:
 
 
 auto.create.topics.enable=true
+
 Save and exit nano (Ctrl + O, then Enter, then Ctrl + X).
 
-🔁 Restart Kafka After Changes
+Restart Kafka After Changes
 If you edited the file, restart the broker:
 
 
@@ -220,12 +224,12 @@ bin/kafka-server-start.sh config/server.properties
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Kafka Consumer Microservice
-🧱 Purpose:
+Purpose:
 Listens to the notifications topic
 
 Logs or processes incoming messages from Kafka
 
-📁 Project Structure
+Project Structure
 notification-consumer/
 ├── src/
 │   └── main/
@@ -239,7 +243,7 @@ notification-consumer/
 
 
  Kafka Consumer + Database (Spring Boot + JPA + Kafka)
-🎯 Goal:
+Goal:
 Listen to Kafka topic notifications
 
 Save each message into a relational database (like H2, PostgreSQL, MySQL)
@@ -261,7 +265,7 @@ notification-consumer-db/
 ├── pom.xml
 └── README.md
 
-🧱 Add These Dependencies (Maven)
+Add These Dependencies (Maven)
 
 <dependencies>
     <!-- Kafka -->
@@ -301,7 +305,7 @@ A notification producer via REST on Windows
 
 A consumer microservice that logs and persists messages
 
-🚀 That’s a rock-solid dev architecture — production-worthy with a few tweaks like auth, schema validation, or retries.
+That’s a rock-solid dev architecture — production-worthy with a few tweaks like auth, schema validation, or retries.
 
 POST to NotificationService (Windows)
  ⮕ Sent to Kafka (WSL2)
